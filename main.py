@@ -1,16 +1,48 @@
 from typing import Optional
 from fastapi import FastAPI, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 app = FastAPI(title="FastAPI CRUD Tutorial")
 
-# 1. Define the Schema for an Item
+# # 1. Define the Schema for an Item
+# class Item(BaseModel):
+#     id: int
+#     title: str
+#     description: Optional[str] = None
+#     price: float
+#     is_available: bool = True
+
+# 1. Define the Schema for an Item with Field Validations  (alternative)
 class Item(BaseModel):
-    id: int
-    title: str
-    description: Optional[str] = None
-    price: float
-    is_available: bool = True
+    id: int = Field(
+        ..., 
+        gt=0, 
+        description="Unique item ID (must be positive)",
+        examples=[1]
+    )
+    title: str = Field(
+        ..., 
+        min_length=3, 
+        max_length=100, 
+        description="Item title (3 to 100 characters)",
+        examples=["FastAPI Handbook"]
+    )
+    description: Optional[str] = Field(
+        None, 
+        max_length=300, 
+        description="Optional item description"
+    )
+    price: float = Field(
+        ..., 
+        gt=0, 
+        description="Price in USD (must be greater than 0)",
+        examples=[29.99]
+    )
+    is_available: bool = Field(
+        default=True, 
+        description="Availability status"
+    )
+
 
 # 2. In-Memory "Database" (simple Python list to store items)
 db_items: list[Item] = []
